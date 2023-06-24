@@ -1,0 +1,17 @@
+version: '3.9'
+# Defining the compose version
+services:
+ 
+ # Django application
+ dultdashboard:
+   # Build context
+   build:
+    dockerfile: ./Dockerfile
+   ports:
+    - 8000:8000
+   # Build commands
+   command: sh -c "python manage.py makemigrations &&
+                   python manage.py migrate &&
+                   gunicorn dultdashboard.wsgi:application --bind 0.0.0.0:8000 --workers 4 --timeout 120"
+
+   restart: "on-failure"
