@@ -64,10 +64,17 @@ class LineChartDataQuery(APIView):
 
         for intent_count_data in intent_count:
             intent_key = str(intent_count_data[0])
+            sub_intent_key = intent_count_data[1]
+            if sub_intent_key == 'Others':
+                continue
+            if sub_intent_key == 'Appeal/Complaint/Request':
+                sub_intent_key = 'appeal'
+            if sub_intent_key == 'Urgent Actionable':
+                sub_intent_key = 'urgent_actionable'
             if intent_key in intent_data_dict.keys():
-                intent_data_dict[intent_key].append((intent_count_data[1], intent_count_data[2]))
+                intent_data_dict[intent_key].append({sub_intent_key: intent_count_data[2]})
             else:
-                intent_data_dict[intent_key] = [(intent_count_data[1], intent_count_data[2])]
+                intent_data_dict[intent_key] = [{sub_intent_key: intent_count_data[2]}]
         
         current_date = start_formatted_datetime_obj
         delta = timedelta(days=1)
@@ -125,12 +132,14 @@ class BarGraphDataQuery(APIView):
 
         for sub_super_count_data in sub_super_count:
             super_value = str(sub_super_count_data[0])
+            super_value = super_value.replace("/","_OR_")
             sub_value = str(sub_super_count_data[1])
+            sub_value = sub_value.replace("/","_OR_")
             frequency_value = str(sub_super_count_data[2])
             if super_value not in sub_super_count_dict:
-                sub_super_count_dict[super_value] = [(sub_value, frequency_value)]
+                sub_super_count_dict[super_value] = [{sub_value: frequency_value}]
             else:
-                sub_super_count_dict[super_value].append((sub_value, frequency_value))
+                sub_super_count_dict[super_value].append({sub_value: frequency_value})
 
         return Response(data=sub_super_count_dict, status=status.HTTP_200_OK)
 
@@ -157,7 +166,7 @@ class CardDataAPI(APIView):
             sentiment_data_dict[sentiment_data[0]] = sentiment_data[1]
         
         intent_data_dict = {}
-        intent_data_query = """select intent, count(intent) as cnt from dult_grievance_classification where DATE(date)  >= curdate() - 7 group by intent"""
+        intent_data_query = """select intent, count(intent) as cnt from dult_grievance_classification where DATE(date)  >= curdate() - 100 group by intent"""
         self.cursor.execute(intent_data_query)
         intent_count = self.cursor.fetchall()
         for intent_count_data in intent_count:
@@ -165,10 +174,15 @@ class CardDataAPI(APIView):
             intent_key = intent_count_data[0]
             if intent_key == 'Others':
                 continue
+            
+            if intent_key == 'Appeal/Complaint/Request':
+                intent_key = 'appeal'
+            if intent_key == 'Urgent Actionable':
+                intent_key = 'urgent_actionable'
             intent_data_dict[intent_key] = intent_count_data[1]
         
         final_data = {
-            "today_count_card" : today_tweets_count,
+            "tweet_count_card" : today_tweets_count,
             "sentiment": sentiment_data_dict,
             "intent": intent_data_dict,
         }
