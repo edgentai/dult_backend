@@ -77,7 +77,7 @@ class LineChartDataQuery(APIView):
             current_date += delta
         
         for date_range in date_list:
-            if date_range not in intent_data_dict:
+            if str(date_range) not in intent_data_dict:
                 intent_data_dict[str(date_range)] = []
 
         return Response(data=intent_data_dict, status=status.HTTP_200_OK)
@@ -131,17 +131,6 @@ class BarGraphDataQuery(APIView):
                 sub_super_count_dict[super_value] = [(sub_value, frequency_value)]
             else:
                 sub_super_count_dict[super_value].append((sub_value, frequency_value))
-        
-        current_date = start_formatted_datetime_obj
-        delta = timedelta(days=1)
-        date_list = []
-        while current_date <= end_formatted_datetime_obj:
-            date_list.append(current_date.date())
-            current_date += delta
-        
-        for date_range in date_list:
-            if date_range not in sub_super_count_dict:
-                sub_super_count_dict[str(date_range)] = []
 
         return Response(data=sub_super_count_dict, status=status.HTTP_200_OK)
 
