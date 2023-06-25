@@ -150,15 +150,15 @@ class CardDataAPI(APIView):
     )
     cursor = db.cursor()
 
-    def get(self):
+    def get(self, request):
 
         # Query for tweets count 
-        today_count_card_query = """select count(*) from dult_grievance_classification where DATE(date) >= curdate() - 7"""
+        today_count_card_query = """select count(*) from dult_grievance_classification where DATE(date) >= curdate() - 100"""
         self.cursor.execute(today_count_card_query)
         today_tweets_count = self.cursor.fetchall()[0][0]
 
         # Query for showing sentiment chart
-        sentiment_graph_query = """select Sentiment, count(Sentiment) as cnt from dult_grievance_classification where DATE(date) >= curdate() - 7 group by Sentiment"""
+        sentiment_graph_query = """select Sentiment, count(Sentiment) as cnt from dult_grievance_classification where DATE(date) >= curdate() - 100 group by Sentiment"""
         self.cursor.execute(sentiment_graph_query)
         sentiment_count = self.cursor.fetchall()
         sentiment_data_dict = {}
@@ -198,9 +198,9 @@ class TweetDataAPI(APIView):
     )
     cursor = db.cursor()
 
-    def get(self):
+    def get(self, request):
 
-        tweet_data_query = """select * from dult_grievance_classification where DATE(date)  >= curdate() - 7"""
+        tweet_data_query = """select * from dult_grievance_classification where DATE(date)  >= curdate() - 100"""
         self.cursor.execute(tweet_data_query)
         cols_list = ["id","Date","Intent","Sentiment","Sub_Class","Super_Class","user_message"]
         tweet_data = self.cursor.fetchall()
